@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1483704833 source:c:\users\ashk43712\documents\ebooks\cg\experimentersource\tetris\tetris\main.cpp
+1483782897 source:c:\users\ashk43712\documents\ebooks\cg\experimentersource\tetris\tetris\main.cpp
 	<iostream>
 	<stdio.h>
 	<GL/glut.h>
@@ -7,11 +7,8 @@
 	<stdlib.h>
 	<memory.h>
 	<vector>
-	<map>
-	<queue>
-	<stack>
-	<algorithm>
 	<ctime>
+	<sstream>
 	<unistd.h>
 
 1341010376 c:\program files (x86)\codeblocks\mingw\include\stdio.h

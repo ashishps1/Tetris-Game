@@ -6,6 +6,7 @@
 #include<memory.h>
 #include<vector>
 #include<ctime>
+#include<sstream>
 #include<unistd.h>
 
 using namespace std;
@@ -15,13 +16,13 @@ public:
     double r=1.0,g=1.0,b=1.0;
 };
 
-int noRow = 12,noCol =15;
+int noRow = 24,noCol = 20;
 
-Grids grid_color[12][15];
+Grids grid_color[25][20];
 
 double width=1000,height=600;
 
-double grid_width = 50;
+double grid_width = 25;
 bool grid = true;
 
 int curr_tetrimino;
@@ -30,11 +31,20 @@ double transX=0.0,transY=0.0;
 
 int orientation;
 
+int score;
+
 int p=4,q=0;
 
 vector<pair<double,double> > tetriminos[6];
 
 double heights[15];
+
+string to_string(int a){
+	ostringstream out;
+	out<<a;
+	return out.str();
+
+}
 
 void writeBitmapString(void *font, char *string){
    char *c;
@@ -126,23 +136,76 @@ void tetrimino(){
 void draw_line(){
     glColor3f(0.0,0.0,0.0);
     glBegin(GL_POLYGON);
-        glVertex3f(3.0/4*width,0.0,0.0);
-        glVertex3f(3.0/4*width,height,0.0);
-        glVertex3f(3.0/4*width+20,height,0.0);
-        glVertex3f(3.0/4*width+20,0.0,0.0);
+        glVertex3f(1.0/2*width,0.0,0.0);
+        glVertex3f(1.0/2*width,height,0.0);
+        glVertex3f(1.0/2*width+20,height,0.0);
+        glVertex3f(1.0/2*width+20,0.0,0.0);
     glEnd();
 
     glBegin(GL_POLYGON);
         glVertex3f(0.0,height,0.0);
         glVertex3f(0.0,height+20,0.0);
-        glVertex3f(3.0/4*width+20,height+20,0.0);
-        glVertex3f(3.0/4*width+20,height,0.0);
+        glVertex3f(1.0/2*width+20,height+20,0.0);
+        glVertex3f(1.0/2*width+20,height,0.0);
+    glEnd();
+
+    glColor3f(1.0,0.0,0.0);
+
+    glBegin(GL_POLYGON);
+        glVertex3f(3.0/4*width,0.0,0.0);
+        glVertex3f(3.0/4*width,height,0.0);
+        glVertex3f(3.0/4*width+5,height,0.0);
+        glVertex3f(3.0/4*width+5,0.0,0.0);
     glEnd();
 
 
    glColor3f(0.0,1.0, 0.0);
    glRasterPos3f(3.0/4*width+100,height, 0.0);
-   writeBitmapString(GLUT_BITMAP_9_BY_15, "Score");
+
+   writeBitmapString(GLUT_BITMAP_9_BY_15,"Manual");
+
+   glRasterPos3f(3.0/4*width+10,height-50, 0.0);
+
+   writeBitmapString(GLUT_BITMAP_9_BY_15,"Press up arrow to rotate tetrimino");
+
+   glRasterPos3f(3.0/4*width+10,height-100, 0.0);
+
+   writeBitmapString(GLUT_BITMAP_9_BY_15,"Press left arrow to move left");
+
+   glRasterPos3f(3.0/4*width+10,height-150, 0.0);
+
+   writeBitmapString(GLUT_BITMAP_9_BY_15,"Press right arrow to move right");
+
+   glRasterPos3f(3.0/4*width+10,height-200, 0.0);
+
+   writeBitmapString(GLUT_BITMAP_9_BY_15,"Press down arrow to settle");
+
+   glRasterPos3f(3.0/4*width+10,height-275, 0.0);
+
+   writeBitmapString(GLUT_BITMAP_9_BY_15,"Fill all the boxes in a row");
+
+   glRasterPos3f(3.0/4*width+10,height-300, 0.0);
+
+   writeBitmapString(GLUT_BITMAP_9_BY_15,"to clear it");
+
+
+    glRasterPos3f(1.0/2*width+100,height, 0.0);
+
+    writeBitmapString(GLUT_BITMAP_9_BY_15,"Score");
+
+    glRasterPos3f(1.0/2*width+100,height-50, 0.0);
+
+    string s = to_string(score);
+
+    char scr[10];
+    int i;
+    for(i=0;i<s.size();i++){
+        scr[i]=s[i];
+    }
+    scr[i]='\0';
+
+    writeBitmapString(GLUT_BITMAP_9_BY_15,scr);
+
 
 }
 
@@ -150,7 +213,7 @@ void draw_grid(){
     glColor3f(0.0,0.0,0.0);
     double t=0;
 
-    while(t<=3.0/4*width){
+    while(t<=1.0/2*width){
         glBegin(GL_LINES);
             glVertex3f(t,0.0,0.0);
             glVertex3f(t,height,0.0);
@@ -162,7 +225,7 @@ void draw_grid(){
     while(t<=height){
         glBegin(GL_LINES);
             glVertex3f(0.0,t,0.0);
-            glVertex3f(3.0/4*width,t,0.0);
+            glVertex3f(1.0/2*width,t,0.0);
         glEnd();
         t+=grid_width;
     }
@@ -760,15 +823,17 @@ void paint_grids(){
 
 void destroy(){
     int i,j,k;
+    int destroy_count=0;
     for(i=noRow-1;i>=0;i--){
-        int noFilled=0;
+        int filled=0;
         for(j=0;j<noCol;j++){
-            if(grid_color[i][j].r!=1.0&&grid_color[i][j].g!=1.0&&grid_color[i][j].b!=1.0){
-                noFilled++;
+            if(grid_color[i][j].r!=1.0||grid_color[i][j].g!=1.0||grid_color[i][j].b!=1.0){
+                filled++;
             }
         }
-        if(noFilled==noCol){
-            for(k=i;k<noRow-1;k++){
+        if(filled==noCol){
+            destroy_count++;
+            for(k=i;k<noRow;k++){
                 for(j=0;j<noCol;j++){
                     grid_color[k][j].r=grid_color[k+1][j].r;
                     grid_color[k][j].g=grid_color[k+1][j].g;
@@ -777,25 +842,30 @@ void destroy(){
             }
         }
     }
+
+    if(destroy_count==1){
+        score += 100;
+    }
+    else{
+        score += 200*destroy_count;
+    }
 }
 
 void next_tetrimino(){
 
-    if(fall){
-
+    if(fall&&(!wait_for_next)){
         paint_grids();
         update_heights();
         destroy();
-
         fall=false;
         wait_for_next=true;
+        wait_counter=0;
     }
     else if(wait_for_next){
         wait_counter++;
-        if(wait_counter==2000){
+        if(wait_counter==1000){
             color=true;
             wait_for_next=false;
-            wait_counter=0;
             transX=0;
             transY=0;
         }
@@ -812,6 +882,7 @@ void next_tetrimino(){
             //cout<<r<<" "<<g<<" "<<b<<endl;
             color=false;
             p=rand()%6;
+            cout<<p<<endl;
         }
 
         glColor3f(r,g,b);
@@ -873,8 +944,8 @@ int timer=0;
 
 void idle(){
     timer++;
-    if(timer==1500){
-        transY -= 50;
+    if(timer==500){
+        transY -= grid_width;
         timer=0;
     }
 
@@ -901,7 +972,7 @@ void keyboardFunc(unsigned char key, int x, int y ){
 
 void specialKeyInput(int key, int x, int y){
 	if(key == GLUT_KEY_LEFT){
-        transX -= 50;
+        transX -= grid_width;
         bool out = false;
         for(int i=0;i<4;i++){
             if(tetriminos[p][i+q].first+transX<0){
@@ -910,20 +981,20 @@ void specialKeyInput(int key, int x, int y){
             }
         }
         if(out){
-            transX += 50;
+            transX += grid_width;
         }
 	}
 	else if(key == GLUT_KEY_RIGHT){
-        transX += 50;
+        transX += grid_width;
         bool out = false;
         for(int i=0;i<4;i++){
-            if(tetriminos[p][i+q].first+transX>3.0*width/4-20){
+            if(tetriminos[p][i+q].first+transX>1.0*width/2-20){
                 out=true;
                 break;
             }
         }
         if(out){
-            transX -= 50;
+            transX -= grid_width;
         }
     }
 	else if(key == GLUT_KEY_UP){
